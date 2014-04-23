@@ -48,7 +48,7 @@ else:
     __revision__ = release.revision
     __date__ = release.date
 
-__author__ = '%s <%s>\n%s <%s>\n%s <%s>' % \
+__author__ = '%s <%s>\n%s <%s>\n%s <%s>\n%s <%s>' % \
              (release.authors['Hagberg'] + release.authors['Schult'] +
               release.authors['Renieris'] + release.authors['Fischer'])
 __license__ = release.license
