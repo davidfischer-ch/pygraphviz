@@ -9,7 +9,7 @@ A Python interface to Graphviz.
 #    Manos Renieris, http://www.cs.brown.edu/~er/
 #    Distributed with BSD license.
 #    All rights reserved, see LICENSE for details.
-from __future__ import print_function
+from __future__ import absolute_import, print_function
 
 import re
 import shlex
@@ -17,14 +17,17 @@ import subprocess
 import sys
 import threading
 import warnings
-import UserDict
+try:
+    from collections import UserDict
+except ImportError:
+    import UserDict
 
-import graphviz as gv
+from . import graphviz as gv
 
 _DEFAULT_ENCODING = 'UTF-8'
 
 
-def is_string_like(obj): # from John Hunter, types-free version
+def is_string_like(obj):  # from John Hunter, types-free version
     try:
         obj + ''
     except (TypeError, ValueError):
@@ -136,7 +139,7 @@ class AGraph(object):
             string = None
             handle = None
             if isinstance(thing, dict):
-                data = thing # a dictionary of dictionaries (or lists)
+                data = thing  # a dictionary of dictionaries (or lists)
             elif hasattr(thing, 'own'):  # a Swig pointer - graph handle
                 handle = thing
             elif self._is_string_like(thing):
@@ -240,7 +243,6 @@ class AGraph(object):
     def __hash__(self):
         # hash the string representation for id
         return hash(self.string())
-
 
     def __iter__(self):
         # provide "for n in G"
@@ -401,7 +403,7 @@ class AGraph(object):
 
         """
         try:
-            node = Node(self, n)
+            Node(self, n)
             return True
         except KeyError:
             return False
@@ -472,7 +474,7 @@ class AGraph(object):
             e = Edge(self, eh=eh)
             e.attr.update(**attr)
         except KeyError:
-            return None # silent failure for strict graph, already added
+            return None  # silent failure for strict graph, already added
 
     def add_edges_from(self, ebunch, **attr):
         """Add nodes to graph from a container ebunch.
@@ -577,7 +579,6 @@ class AGraph(object):
         """
         return self.has_edge(u, v)
 
-
     def neighbors_iter(self, n):
         """Return iterator over the nodes attached to n.
 
@@ -626,7 +627,7 @@ class AGraph(object):
                         yield e
                     eh = gv.agnxtout(self.handle, eh)
                 nh = gv.agnxtnode(self.handle, nh)
-        elif nbunch in self: # if nbunch is a single node
+        elif nbunch in self:  # if nbunch is a single node
             n = Node(self, nbunch)
             nh = n.handle
             eh = gv.agfstout(self.handle, nh)
@@ -639,7 +640,7 @@ class AGraph(object):
                 eh = gv.agnxtout(self.handle, eh)
         else:                # if nbunch is a sequence of nodes
             try:
-                bunch = [n for n in nbunch if n in self]
+                [n for n in nbunch if n in self]
             except TypeError:
                 raise TypeError("nbunch is not a node or a sequence of nodes.")
             for n in nbunch:
@@ -656,7 +657,6 @@ class AGraph(object):
                         yield e
                     eh = gv.agnxtout(self.handle, eh)
         raise StopIteration
-
 
     iteroutedges = out_edges_iter
 
@@ -682,7 +682,7 @@ class AGraph(object):
                         yield e
                     eh = gv.agnxtin(self.handle, eh)
                 nh = gv.agnxtnode(self.handle, nh)
-        elif nbunch in self: # if nbunch is a single node
+        elif nbunch in self:  # if nbunch is a single node
             n = Node(self, nbunch)
             nh = n.handle
             eh = gv.agfstin(self.handle, nh)
@@ -695,7 +695,7 @@ class AGraph(object):
                 eh = gv.agnxtin(self.handle, eh)
         else:                # if nbunch is a sequence of nodes
             try:
-                bunch = [n for n in nbunch if n in self]
+                [n for n in nbunch if n in self]
             except TypeError:
                 raise TypeError("nbunch is not a node or a sequence of nodes.")
             for n in nbunch:
@@ -760,7 +760,6 @@ class AGraph(object):
         """
         return list(self.in_edges_iter(nbunch=nbunch, keys=keys))
 
-
     def predecessors_iter(self, n):
         """Return iterator over predecessor nodes of n.
 
@@ -779,7 +778,6 @@ class AGraph(object):
                 yield Node(self, s)
             eh = gv.agnxtin(self.handle, eh)
         raise StopIteration
-
 
     iterpred = predecessors_iter
 
@@ -808,7 +806,6 @@ class AGraph(object):
         """Return list of successor nodes of n."""
         return list(self.successors_iter(n))
 
-
     def predecessors(self, n):
         """Return list of predecessor nodes of n."""
         return list(self.predecessors_iter(n))
@@ -826,7 +823,7 @@ class AGraph(object):
         # prepare nbunch
         if nbunch is None:   # include all nodes via iterator
             bunch = [n for n in self.nodes_iter()]
-        elif nbunch in self: # if nbunch is a single node
+        elif nbunch in self:  # if nbunch is a single node
             bunch = [Node(self, nbunch)]
         else:                # if nbunch is a sequence of nodes
             try:
@@ -872,7 +869,6 @@ class AGraph(object):
             else:
                 return dlist
 
-
     def in_degree(self, nbunch=None, with_labels=False):
         """Return the in-degree of nodes given in nbunch container.
 
@@ -888,7 +884,6 @@ class AGraph(object):
                 return dlist[0]
             else:
                 return dlist
-
 
     def reverse(self):
         """Return copy of directed graph with edge directions reversed."""
@@ -910,7 +905,6 @@ class AGraph(object):
             return H
         else:
             return self
-
 
     def degree(self, nbunch=None, with_labels=False):
         """Return the degree of nodes given in nbunch container.
@@ -937,7 +931,6 @@ class AGraph(object):
     def size(self):
         """Return the number of edges in the graph."""
         return self.number_of_edges()
-
 
     def clear(self):
         """Remove all nodes, edges, and attributes from the graph."""
@@ -972,7 +965,6 @@ class AGraph(object):
 
         return self.__class__(filename=fhandle)
 
-
     def add_path(self, nlist):
         """Add the path of nodes given in nlist."""
         fromv = nlist.pop(0)
@@ -989,7 +981,7 @@ class AGraph(object):
         # private function to build bunch from nbunch
         if nbunch is None:   # include all nodes via iterator
             bunch = self.nodes_iter()
-        elif nbunch in self: # if nbunch is a single node
+        elif nbunch in self:  # if nbunch is a single node
             bunch = [Node(self, nbunch)]
         else:                # if nbunch is a sequence of nodes
             try:   # capture error for nonsequence/iterator entries.
@@ -1013,7 +1005,8 @@ class AGraph(object):
                            directed=self.directed,
                            handle=handle, name=name,
                            **attr)
-        if nbunch is None: return H
+        if nbunch is None:
+            return H
         # add induced subgraph on nodes in nbunch
         bunch = self.prepare_nbunch(nbunch)
         H.add_nodes_from(bunch)
@@ -1022,7 +1015,6 @@ class AGraph(object):
                 H.add_edge(u, v)
 
         return H
-
 
     def remove_subgraph(self, name):
         """Remove subgraph with given name."""
@@ -1093,7 +1085,6 @@ class AGraph(object):
         """Return a list of all subgraphs in the graph."""
         return list(self.subgraphs_iter())
 
-
     # directed, undirected tests and conversions
 
     def is_strict(self):
@@ -1143,7 +1134,6 @@ class AGraph(object):
                 uv = U.get_edge(u, v)
                 uv.attr.update(e.attr)
             return U
-
 
     def to_directed(self, **kwds):
         """Return directed copy of graph.
@@ -1208,7 +1198,6 @@ class AGraph(object):
             gv.agwrite(self.handle, fh)
         except IOError:
             print("IO error writing file")
-
 
     def string_nop(self):
         """Return a string (unicode) representation of graph in dot format."""
@@ -1362,7 +1351,6 @@ class AGraph(object):
             return self.__class__(string=data)
         else:
             return self.from_string(data)
-
 
     def acyclic(self, args='', copy=False):
         """Reverse sufficient edges in digraph to make graph acyclic.
@@ -1680,7 +1668,7 @@ class Attribute(UserDict.DictMixin):
         self.type = atype
         # get the encoding
         ghandle = gv.agraphof(handle)
-        root_handle = gv.agroot(ghandle) # get root graph
+        root_handle = gv.agroot(ghandle)  # get root graph
         try:
             ah = gv.agattr(root_handle, 0, 'charset', None)
             self.encoding = gv.agattrdefval(ah)
@@ -1692,7 +1680,7 @@ class Attribute(UserDict.DictMixin):
             raise ValueError('Graph charset is immutable!')
         if not is_string_like(value):
             value = str(value)
-        ghandle = gv.agroot(self.handle) # get root graph
+        ghandle = gv.agroot(self.handle)  # get root graph
         if ghandle == self.handle:
             gv.agattr_label(self.handle, self.type,
                             name.encode(self.encoding),
@@ -1701,7 +1689,6 @@ class Attribute(UserDict.DictMixin):
             gv.agsafeset_label(ghandle, self.handle,
                                name.encode(self.encoding),
                                value.encode(self.encoding), '')
-
 
     def __getitem__(self, name):
         item = gv.agget(self.handle, name.encode(self.encoding))
@@ -1739,7 +1726,7 @@ class Attribute(UserDict.DictMixin):
                 ah = gv.agnxtattr(self.handle, self.type, ah)
                 yield (gv.agattrname(ah).decode(self.encoding),
                        gv.agattrdefval(ah).decode(self.encoding))
-            except KeyError: # gv.agattrdefval returned KeyError, skip
+            except KeyError:  # gv.agattrdefval returned KeyError, skip
                 continue
 
 
@@ -1767,7 +1754,7 @@ class ItemAttribute(Attribute):
         self.type = atype
         self.ghandle = gv.agraphof(handle)
         # get the encoding
-        root_handle = gv.agroot(self.ghandle) # get root graph
+        root_handle = gv.agroot(self.ghandle)  # get root graph
         try:
             ah = gv.agattr(root_handle, 0, 'charset', None)
             self.encoding = gv.agattrdefval(ah)
@@ -1802,15 +1789,15 @@ class ItemAttribute(Attribute):
                 ah = gv.agnxtattr(self.ghandle, self.type, ah)
                 value = gv.agxget(self.handle, ah)
                 try:
-                    defval = gv.agattrdefval(ah) # default value
+                    defval = gv.agattrdefval(ah)  # default value
                     if defval == value:
-                        continue # don't report default
-                except: # no default, gv.getattrdefval raised error
+                        continue  # don't report default
+                except:  # no default, gv.getattrdefval raised error
                     pass
                     # unique value for this edge
                 yield (gv.agattrname(ah).decode(self.encoding),
                        value.decode(self.encoding))
-            except KeyError: # gv.agxget returned KeyError, skip
+            except KeyError:  # gv.agxget returned KeyError, skip
                 continue
 
 
@@ -1822,13 +1809,12 @@ def _test_suite():
                                  'tests/layout_draw.txt',
                                  'tests/subgraph.txt',
                                  package='pygraphviz')
-    doctest.testmod() # test docstrings in module
+    doctest.testmod()  # test docstrings in module
     return suite
 
 
 if __name__ == "__main__":
     import os
-    import sys
     import unittest
 
     if sys.version_info[:2] < (2, 4):
@@ -1836,5 +1822,5 @@ if __name__ == "__main__":
         sys.exit(-1)
         # directory of package (relative to this)
     nxbase = sys.path[0] + os.sep + os.pardir
-    sys.path.insert(0, nxbase) # prepend to search path
+    sys.path.insert(0, nxbase)  # prepend to search path
     unittest.TextTestRunner().run(_test_suite())

@@ -24,16 +24,16 @@ See pygraphviz.AGraph for detailed documentation.
 #    Distributed with BSD license.
 #    All rights reserved, see LICENSE for details.
 
-from __future__ import print_function
+from __future__ import absolute_import, print_function
 
 # Release data
-import release
+from . import release
 
 if release.revision is None:
     # we probably not running in an svn directory
     try:
         # use release data stored at installatation time.
-        import version
+        from . import version
         __version__ = version.__version__
         __revision__ = version.__revision__
         __date__ = version.__date__
@@ -53,7 +53,7 @@ __author__ = '%s <%s>\n%s <%s>\n%s <%s>\n%s <%s>' % \
               release.authors['Renieris'] + release.authors['Fischer'])
 __license__ = release.license
 
-from agraph import AGraph, Node, Edge, Attribute, ItemAttribute
+from .agraph import AGraph, Node, Edge, Attribute, ItemAttribute
 
 __all__ = [
     'AGraph',
@@ -65,11 +65,11 @@ __all__ = [
 
 
 def version():
-    from agraph import _get_prog
     import os
+    from .agraph import _get_prog
     print("pygraphviz-" + __version__)
     neato = _get_prog('neato')
-    os.system(neato+' -V')
+    os.system(neato + ' -V')
 
 # import tests: run as pygraphviz.test()
-from tests import run as test
+from .tests import run as test
