@@ -1778,7 +1778,7 @@ class ItemAttribute(Attribute):
         if not is_string_like(value):
             value = str(value)
         if self.type == 1 and name == 'label':
-            default = '\N'
+            default = '\\N'
         else:
             default = ''
         gv.agsafeset_label(self.ghandle, self.handle,

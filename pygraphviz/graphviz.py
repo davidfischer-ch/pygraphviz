@@ -4,10 +4,8 @@
 # Do not make changes to this file unless you know what you are doing--modify
 # the SWIG interface file instead.
 
-
-
 from sys import version_info
-if version_info >= (2,6,0):
+if version_info >= (2, 6, 0):
     def swig_import_helper():
         from os.path import dirname
         import imp
@@ -80,7 +78,7 @@ def agraphnew(name,strict=False,directed=False):
     else:
         if directed:
             return _graphviz.agopen(name,cvar.Agdirected,None)
-        else:		 
+        else:
             return _graphviz.agopen(name,cvar.Agundirected,None)
 
 
@@ -286,7 +284,7 @@ def agnameof(handle):
   if name=='' or name.startswith('%'):
     return None
   else:
-    return name 
+    return name
 
 AGRAPH = _graphviz.AGRAPH
 AGNODE = _graphviz.AGNODE
